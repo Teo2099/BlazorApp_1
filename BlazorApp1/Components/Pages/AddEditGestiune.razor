@@ -1,0 +1,59 @@
+﻿@page "/addGestiune"
+@page "/editGestiune/{gestiuneId:decimal}"
+@inject IGestiuniService _gestiuneService
+@rendermode InteractiveServer
+
+<PageTitle>AddEditGestiune</PageTitle>
+
+<div class="col-md-5">
+    <EditForm Model="@gestiune" OnValidSubmit="save" FormName="addEditForm">
+        <DataAnnotationsValidator />
+        <div class="form-group">
+            <label for="Denumire"> Denumire</label>
+            <InputText class="form-control" @bind-Value="gestiune.Denumire"></InputText>
+            <ValidationMessage For="()=> gestiune.Denumire" />
+        </div>
+        <div class="m-2">
+            @message
+        </div>
+
+        <div class="m-2">
+            <button type="submit" class="btn btn-success btn-sm">Save gestiune</button>
+            <a href="/gestiuni" class="btn btn-outline-primary">Show table</a>
+        </div>
+    </EditForm>
+</div>
+
+
+@code {
+    [Parameter]
+    public decimal gestiuneId { get; set; }
+
+    [SupplyParameterFromForm]
+    public Gestiuni gestiune{ get; set; } = new();
+
+    private string message = string.Empty;
+
+    private void save()
+    {
+        if (_gestiuneService.AddEdit(gestiune))
+        {
+            message = "Gestiune saved!";
+            gestiune = new();
+        }
+        else
+        {
+            message = "Gestiune not saved!";
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        if (gestiuneId > 0)
+        {
+            gestiune = _gestiuneService.FindById(gestiuneId);
+        }
+
+        base.OnInitialized();
+    }
+}

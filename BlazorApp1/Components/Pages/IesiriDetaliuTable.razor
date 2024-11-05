@@ -1,0 +1,68 @@
+﻿@page "/iesiri_detaliu/{iesireId:decimal}"
+@using BlazorApp1.Data
+@using BlazorApp1.Models
+@rendermode InteractiveServer
+@inject DbProject1Context _dbContext
+@inject IIesiriDetaliuService _iesiriDetaliuService
+
+<PageTitle>IESIRI DETALIU</PageTitle>
+
+<h3>Iesiri detaliu</h3>
+
+<div class="card">
+    <div class="card-body">
+        <a href="/addIesireDetaliu/@iesireId" class="btn btn-outline-primary">Add detaliu</a>
+        <table class="table table-striped text-md-center">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Id_iesiri</th>
+                    <th>Produs</th>
+                    <th>Cantitate</th>
+                    <th>Valoare</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var result in _dbContext.IesiriDetalius.Where(x => x.IdIesiri == iesireId))
+                {
+                    var produs = _dbContext.Produses.Where(x => x.Id == result.Produs).FirstOrDefault();
+                    <tr>
+                        <td>@result.Id</td>
+                        <td>@result.IdIesiri</td>
+                        <td>@produs.Denumire</td>
+                        <td>@result.Cantitate</td>
+                        <td>@result.Valoare</td>
+                        <td>
+                            <a href="/editIesireDetaliu/@result.Id/@iesireId" class="btn btn-success">Edit</a>
+                            <button class="btn btn-danger" @onclick="() => delete(result)">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public decimal iesireId { get; set; }
+
+    private List<Models.IesiriDetaliu> iesiriDetaliu = new();
+
+    private void delete(Models.IesiriDetaliu iesireDetaliu)
+    {
+        if (_iesiriDetaliuService.Delete(iesireDetaliu.Id))
+        {
+            iesiriDetaliu.Remove(iesireDetaliu);
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        iesiriDetaliu = _iesiriDetaliuService.FindAll();
+        base.OnInitialized();
+    }
+}
+
+
+

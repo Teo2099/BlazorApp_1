@@ -1,0 +1,65 @@
+﻿@page "/addProdus"
+@page "/editProdus/{prodId:decimal}"
+@inject IProduseService _produseService
+@rendermode InteractiveServer
+
+<PageTitle>AddEditProdus</PageTitle>
+
+<div class="col-md-5">
+    <EditForm Model="@produs" OnValidSubmit="save" FormName="addEditForm">
+        <DataAnnotationsValidator />
+            <div class="form-group">
+                <label for="Denumire"> Denumire</label>
+                <InputText class="form-control" @bind-Value="produs.Denumire"></InputText>
+                <ValidationMessage For="()=> produs.Denumire" />
+            </div>
+            <div class="form-group">
+                <label for="Pret"> Pret</label>
+                <InputNumber class="form-control" @bind-Value="produs.PretUnitar"></InputNumber>
+                <ValidationMessage For="()=> produs.PretUnitar" />
+            </div>
+
+            <div class="m-2">
+                @message
+            </div>
+
+            <div class="m-2">
+                <button type="submit" class="btn btn-success btn-sm">Save produs</button>
+                <a href="/produse" class="btn btn-outline-primary">Show table</a>
+            </div>
+    </EditForm>
+</div>
+
+
+@code {
+    [Parameter]
+    public decimal prodId { get; set; }
+
+    [SupplyParameterFromForm]
+    public Produse produs { get; set; } = new();
+
+    private string message = string.Empty;
+
+    private void save()
+    {
+        if (_produseService.AddEdit(produs))
+        {
+            message = "Produs saved!";
+            produs = new();
+        }
+        else
+        {
+            message = "Produs not saved!";
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        if(prodId > 0)
+        {
+            produs = _produseService.FindById(prodId);
+        }
+
+        base.OnInitialized();
+    }
+}

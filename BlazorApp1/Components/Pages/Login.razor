@@ -1,0 +1,64 @@
+﻿@page "/login"
+@using Microsoft.AspNetCore.Authentication
+@using System.Security.Claims
+@inject NavigationManager _navigationManager
+@inject UserContext _userContext
+
+<EditForm Model="_model" OnValidSubmit="LoginAsync" FormName="LoginForm">
+    <DataAnnotationsValidator/>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2>Login</h2>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Username:</label>
+                    <InputText typeof="email" @bind-Value="_model.Username" class="form-control" placeholder="Enter username" />
+                    <ValidationMessage For="()=> _model.Username" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Password:</label>
+                    <InputText typeof="password" @bind-Value="_model.Password" class="form-control" placeholder="Enter password" />
+                    <ValidationMessage For="()=> _model.Password" />
+                </div>
+            </div>
+            <div class="card-footer">
+                <button type="submit" class="btn btn-success btn-sm">Login</button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [CascadingParameter]
+    public HttpContext? _httpContext { get; set; }
+
+    [SupplyParameterFromForm]
+    public LoginModel _model{ get; set; } = new();
+
+    private async Task LoginAsync()
+    {
+        var userAccount = _userContext.Users.Where(x => x.Email == _model.Username).FirstOrDefault();
+
+        if(userAccount is null || userAccount.Password != _model.Password)
+        {
+            await Task.Delay(1000);
+            _navigationManager.NavigateTo("/access_denied");
+        }
+        else
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, _model.Username)
+            };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+
+            await _httpContext.SignInAsync(principal);
+            _navigationManager.NavigateTo("/");
+        }
+    }
+}

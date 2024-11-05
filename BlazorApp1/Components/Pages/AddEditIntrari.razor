@@ -1,0 +1,82 @@
+﻿@page "/addIntrare"
+@page "/editIntrare/{intrareId:decimal}"
+@inject IIntrariService _intrariService
+@rendermode InteractiveServer
+@inject DbProject1Context _dbContext
+
+<PageTitle>AddEditIntrare</PageTitle>
+
+<div class="col-md-5">
+    <EditForm Model="@intrare" OnValidSubmit="save" FormName="addEditForm">
+        <DataAnnotationsValidator />
+        <div class="form-group">
+            <label for="Data"> Data</label>
+            <InputDate class="form-control" @bind-Value="intrare.Data"></InputDate>
+            <ValidationMessage For="()=> intrare.Data" />
+        </div>
+        <div class="form-group">
+            <label for="Partener"> Partener</label>
+            <InputSelect class="form-control" @bind-Value="intrare.Partener">
+                <option>-Select partener-</option>
+                @foreach(var result in _dbContext.Parteneris)
+                {
+                    <option value="@result.Id">@result.Denumire</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="()=> intrare.Partener" />
+        </div>
+        <div class="form-group">
+            <label for="Gestiune"> Gestiune</label>
+            <InputSelect class="form-control" @bind-Value="intrare.Gestiune">
+                <option>-Select gestiune-</option>
+                @foreach (var result in _dbContext.Gestiunis)
+                {
+                    <option value="@result.Id">@result.Denumire</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="()=> intrare.Gestiune" />
+        </div>
+
+        <div class="m-2">
+            @message
+        </div>
+
+        <div class="m-2">
+            <button type="submit" class="btn btn-success btn-sm">Save intrare</button>
+            <a href="/intrari" class="btn btn-outline-primary">Show table</a>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter]
+    public decimal intrareId { get; set; }
+
+    [SupplyParameterFromForm]
+    public Intrari intrare { get; set; } = new();
+
+    private string message = string.Empty;
+
+    private void save()
+    {
+        if (_intrariService.AddEdit(intrare))
+        {
+            message = "Intrare saved!";
+            intrare = new();
+        }
+        else
+        {
+            message = "Intrare not saved!";
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        if (intrareId > 0)
+        {
+            intrare = _intrariService.FindById(intrareId);
+        }
+
+        base.OnInitialized();
+    }
+}

@@ -1,0 +1,74 @@
+﻿@page "/addPartener"
+@page "/editPartener/{partenerId:decimal}"
+@inject IParteneriService _parteneriService
+@rendermode InteractiveServer
+
+<PageTitle>AddEditPartener</PageTitle>
+
+<div class="col-md-5">
+    <EditForm Model="@partener" OnValidSubmit="save" FormName="addEditForm">
+        <DataAnnotationsValidator />
+        <div class="form-group">
+            <label for="Denumire"> Denumire</label>
+            <InputSelect class="form-control" @bind-Value="partener.Denumire">
+                <option>-Select partener-</option>
+                <option>client</option>
+                <option>furnizor</option>
+            </InputSelect>
+            <ValidationMessage For="()=> partener.Denumire" />
+        </div>
+        <div class="form-group">
+            <label for="CUI"> CUI</label>
+            <InputText class="form-control" @bind-Value="partener.Cui"></InputText>
+            <ValidationMessage For="()=> partener.Cui" />
+        </div>
+        <div class="form-group">
+            <label for="Adresa"> Adresa</label>
+            <InputText class="form-control" @bind-Value="partener.Adresa"></InputText>
+            <ValidationMessage For="()=> partener.Adresa" />
+        </div>
+
+        <div class="m-2">
+            @message
+        </div>
+
+        <div class="m-2">
+            <button type="submit" class="btn btn-success btn-sm">Save partener</button>
+            <a href="/parteneri" class="btn btn-outline-primary">Show table</a>
+        </div>
+    </EditForm>
+</div>
+
+
+@code {
+    [Parameter]
+    public decimal partenerId { get; set; }
+
+    [SupplyParameterFromForm]
+    public Parteneri partener { get; set; } = new();
+
+    private string message = string.Empty;
+
+    private void save()
+    {
+        if (_parteneriService.AddEdit(partener))
+        {
+            message = "Partener saved!";
+            partener = new();
+        }
+        else
+        {
+            message = "Partener not saved!";
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        if (partenerId > 0)
+        {
+            partener = _parteneriService.FindById(partenerId);
+        }
+
+        base.OnInitialized();
+    }
+}

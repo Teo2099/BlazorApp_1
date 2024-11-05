@@ -1,0 +1,64 @@
+﻿@page "/parteneri"
+@using BlazorApp1.Data
+@using BlazorApp1.Models
+@inject DbProject1Context _dbContext
+@inject IParteneriService _parteneriService
+@rendermode InteractiveServer
+
+<PageTitle>PARTENERI</PageTitle>
+
+<h3>Parteneri</h3>
+
+<div class="card">
+    <div class="card-body">
+        <a href="/addPartener" class="btn btn-outline-primary">Add partner</a>
+        <table class="table table-striped text-md-center">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Cod</th>
+                    <th>Denumire</th>
+                    <th>CUI</th>
+                    <th>Adresa</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var result in _dbContext.Parteneris)
+                {
+                    <tr>
+                        <td>@result.Id</td>
+                        <td>@result.Cod</td>
+                        <td>@result.Denumire</td>
+                        <td>@result.Cui</td>
+                        <td>@result.Adresa</td>
+                        <td>
+                            <a href="/editPartener/@result.Id" class="btn btn-success">Edit</a>
+                            <button class="btn btn-danger" @onclick="() => delete(result)">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private List<Models.Parteneri> parteneri = new();
+
+    private void delete(Models.Parteneri partener)
+    {
+        if (_parteneriService.Delete(partener.Id))
+        {
+            parteneri.Remove(partener);
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        parteneri = _parteneriService.FindAll();
+        base.OnInitialized();
+    }
+}
+
+
+

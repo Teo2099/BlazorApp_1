@@ -1,0 +1,81 @@
+﻿@page "/addIesireDetaliu/{iesireId:decimal}"
+@page "/editIesireDetaliu/{iesireDetaliuId:decimal}/{iesireId:decimal}"
+@inject IIesiriDetaliuService _iesiriDetaliuService
+@rendermode InteractiveServer
+@inject DbProject1Context _dbContext
+
+<PageTitle>AddEditIesireDetaliu</PageTitle>
+
+<div class="col-md-5">
+    <EditForm Model="@iesireDetaliu" OnValidSubmit="save" FormName="addEditForm">
+        <DataAnnotationsValidator />
+        <div class="form-group">
+            <label for="Produs"> Produs</label>
+            <InputSelect class="form-control" @bind-Value="iesireDetaliu.Produs">
+                <option>-Select produs-</option>
+                @foreach (var result in _dbContext.Produses)
+                {
+                    <option value="@result.Id">@result.Denumire</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="()=> iesireDetaliu.Produs" />
+        </div>
+
+        <div class="form-group">
+            <label for="Cantitate" name="Cantitate"> Cantitate</label>
+            <InputNumber class="form-control" @bind-Value="iesireDetaliu.Cantitate"></InputNumber>
+            <ValidationMessage For="()=> iesireDetaliu.Cantitate" />
+        </div>
+
+        <div class="form-group">
+            <label for="Valoare"> Valoare</label>
+            <InputNumber class="form-control" @bind-Value="iesireDetaliu.Valoare"></InputNumber>
+            <ValidationMessage For="()=> iesireDetaliu.Valoare" />
+        </div>
+
+        <div class="m-2">
+            @message
+        </div>
+
+        <div class="m-2">
+            <button type="submit" class="btn btn-success btn-sm">Save detaliu</button>
+            <a href="/iesiri_detaliu/@iesireId" class="btn btn-outline-primary">Show table</a>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter]
+    public decimal iesireDetaliuId { get; set; }
+
+    [Parameter]
+    public decimal iesireId { get; set; }
+
+    [SupplyParameterFromForm]
+    public IesiriDetaliu iesireDetaliu { get; set; } = new();
+
+    private string message = string.Empty;
+
+    private void save()
+    {
+        if (_iesiriDetaliuService.AddEdit(iesireDetaliu, iesireId))
+        {
+            message = "Detaliu saved!";
+            iesireDetaliu = new();
+        }
+        else
+        {
+            message = "Detaliu not saved!";
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        if (iesireDetaliuId > 0)
+        {
+            iesireDetaliu = _iesiriDetaliuService.FindById(iesireDetaliuId);
+        }
+
+        base.OnInitialized();
+    }
+}

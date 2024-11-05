@@ -1,0 +1,64 @@
+﻿@page "/iesiri"
+@using BlazorApp1.Data
+@using BlazorApp1.Models
+@inject DbProject1Context _dbContext
+@inject IIesiriService _iesiriService
+@rendermode InteractiveServer
+ 
+<PageTitle>IESIRI</PageTitle>
+
+<h3>Iesiri</h3>
+
+<div class="card">
+    <div class="card-body">
+        <a href="/addIesire" class="btn btn-outline-primary">Add iesire</a>
+        <table class="table table-striped text-md-center">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Numar</th>
+                    <th>Data</th>
+                    <th>Gestiune</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var result in _dbContext.Iesiris)
+                {
+                    var gestiune = _dbContext.Gestiunis.Where(x => x.Id == result.Gestiunea).FirstOrDefault();
+                    <tr>
+                        <td>@result.Id</td>
+                        <td>@result.Numar</td>
+                        <td>@result.Data</td>
+                        <td>@gestiune.Denumire</td>
+                        <td>
+                            <a href="/editIesire/@result.Id" class="btn btn-success">Edit</a>
+                            <a href="/iesiri_detaliu/@result.Id" class="btn btn-info">Details</a>
+                            <button class="btn btn-danger" @onclick="() => delete(result)">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private List<Models.Iesiri> iesiri = new();
+
+    private void delete(Models.Iesiri iesire)
+    {
+        if (_iesiriService.Delete(iesire.Id))
+        {
+            iesiri.Remove(iesire);
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        iesiri = _iesiriService.FindAll();
+        base.OnInitialized();
+    }
+}
+
+
+

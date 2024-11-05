@@ -1,0 +1,71 @@
+﻿@page "/addIesire"
+@page "/editIesire/{iesireId:decimal}"
+@inject IIesiriService _iesiriService
+@rendermode InteractiveServer
+@inject DbProject1Context _dbContext
+
+<PageTitle>AddEditIesire</PageTitle>
+
+<div class="col-md-5">
+    <EditForm Model="@iesire" OnValidSubmit="save" FormName="addEditForm">
+        <DataAnnotationsValidator />
+        <div class="form-group">
+            <label for="Data"> Data</label>
+            <InputDate class="form-control" @bind-Value="iesire.Data"></InputDate>
+            <ValidationMessage For="()=> iesire.Data" />
+        </div>
+        <div class="form-group">
+            <label for="Gestiune"> Gestiune</label>
+            <InputSelect class="form-control" @bind-Value="iesire.Gestiunea">
+                <option>-Select gestiune-</option>
+                @foreach (var result in _dbContext.Gestiunis)
+                {
+                    <option value="@result.Id">@result.Denumire</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="()=> iesire.Gestiunea" />
+        </div>
+
+        <div class="m-2">
+            @message
+        </div>
+
+        <div class="m-2">
+            <button type="submit" class="btn btn-success btn-sm">Save iesire</button>
+            <a href="/iesiri" class="btn btn-outline-primary">Show table</a>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter]
+    public decimal iesireId { get; set; }
+
+    [SupplyParameterFromForm]
+    public Iesiri iesire { get; set; } = new();
+
+    private string message = string.Empty;
+
+    private void save()
+    {
+        if (_iesiriService.AddEdit(iesire))
+        {
+            message = "Iesire saved!";
+            iesire = new();
+        }
+        else
+        {
+            message = "Iesire not saved!";
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        if (iesireId > 0)
+        {
+            iesire = _iesiriService.FindById(iesireId);
+        }
+
+        base.OnInitialized();
+    }
+}

@@ -1,0 +1,20 @@
+﻿@page "/logout"
+@inject NavigationManager _navigationManager
+
+<PageTitle>LOGOUT</PageTitle>
+<h1>You have successfully logged out!</h1>
+
+@code {
+    [CascadingParameter]
+    public HttpContext? _httpContext{ get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        if (_httpContext.User.Identity.IsAuthenticated)
+        {
+            await _httpContext.SignOutAsync();
+            _navigationManager.NavigateTo("/logout", true);
+        }
+	}
+}

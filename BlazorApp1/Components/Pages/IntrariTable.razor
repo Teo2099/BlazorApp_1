@@ -1,0 +1,67 @@
+﻿@page "/intrari"
+@using BlazorApp1.Data
+@using BlazorApp1.Models
+@inject IIntrariService _intrariService
+@inject DbProject1Context _dbContext
+@rendermode InteractiveServer
+
+<PageTitle>INTRARI</PageTitle>
+
+<h3>Intrari</h3>
+
+<div class="card">
+    <div class="card-body">
+        <a href="/addIntrare" class="btn btn-outline-primary">Add intrare</a>
+        <table class="table table-striped text-md-center">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Numar</th>
+                    <th>Data</th>
+                    <th>Partener</th>
+                    <th>Gestiune</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var result in _dbContext.Intraris)
+                {
+                    var partener = _dbContext.Parteneris.Where(x => x.Id == result.Partener).FirstOrDefault();
+                    var gestiune = _dbContext.Gestiunis.Where(x => x.Id == result.Gestiune).FirstOrDefault();
+                    <tr>
+                        <td>@result.Id</td>
+                        <td>@result.Numar</td>
+                        <td>@result.Data</td>
+                        <td>@partener.Denumire</td>
+                        <td>@gestiune.Denumire</td>
+                        <td>
+                            <a href="/editIntrare/@result.Id" class="btn btn-success">Edit</a>
+                            <a href="/intrari_detaliu/@result.Id" class="btn btn-info">Details</a>
+                            <button class="btn btn-danger" @onclick="() => delete(result)">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private List<Models.Intrari> intrari = new();
+
+    private void delete(Models.Intrari intrare)
+    {
+        if (_intrariService.Delete(intrare.Id))
+        {
+            intrari.Remove(intrare);
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        intrari = _intrariService.FindAll();
+        base.OnInitialized();
+    }
+}
+
+
+

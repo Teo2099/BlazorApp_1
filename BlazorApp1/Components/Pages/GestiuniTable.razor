@@ -1,0 +1,59 @@
+﻿@page "/gestiuni"
+@using BlazorApp1.Data.Entities
+@inject DbProject1Context _dbContext
+@inject IGestiuniService _gestiuniService
+@rendermode InteractiveServer
+
+<PageTitle>GESTIUNI</PageTitle>
+
+<h3>Gestiuni</h3>
+
+<div class="card">
+    <div class="card-body">
+        <a href="/addGestiune" class="btn btn-outline-primary">Add gestiune</a>
+        <table class="table table-striped text-md-center">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Cod</th>
+                    <th>Denumire</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var result in _dbContext.Gestiunis)
+                {
+                    <tr>
+                        <td>@result.Id</td>
+                        <td>@result.Cod</td>
+                        <td>@result.Denumire</td>
+                        <td>
+                            <a href="/editGestiune/@result.Id" class="btn btn-success">Edit</a>
+                            <button class="btn btn-danger" @onclick="() => delete(result)">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private List<Models.Gestiuni> gestiuni = new();
+
+    private void delete(Models.Gestiuni gestiune)
+    {
+        if (_gestiuniService.Delete(gestiune.Id))
+        {
+            gestiuni.Remove(gestiune);
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        gestiuni = _gestiuniService.FindAll();
+        base.OnInitialized();
+    }
+}
+
+
+
